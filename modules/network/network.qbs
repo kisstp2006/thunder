@@ -10,25 +10,19 @@ Project {
 
     property stringList incPaths: [
         "includes",
-        "../../../common",
-        "../../../thirdparty/next/inc",
-        "../../../thirdparty/next/inc/math",
-        "../../../thirdparty/next/inc/core",
-        "../../../engine/includes",
-        "../../../engine/includes/resources",
-        "../../../engine/includes/editor",
+        "../../common",
+        "../../thirdparty/next/inc",
+        "../../thirdparty/next/inc/math",
+        "../../thirdparty/next/inc/core",
+        "../../engine/includes",
+        "../../engine/includes/resources",
+        "../../engine/includes/editor",
     ]
 
     DynamicLibrary {
         name: "network-editor"
         condition: network.desktop
-        files: {
-            var sources = srcFiles
-            sources.push("src/converters/*.cpp")
-            sources.push("src/converters/*.qrc")
-            sources.push("includes/converters/*.h")
-            return sources
-        }
+        files: srcFiles
         Depends { name: "cpp" }
         Depends { name: "bundle" }
         Depends { name: "next-editor" }
@@ -45,6 +39,9 @@ Project {
 
         Properties {
             condition: qbs.targetOS.contains("windows")
+            cpp.dynamicLibraries: outer.concat([
+                "Ws2_32"
+            ])
         }
 
         Properties {
