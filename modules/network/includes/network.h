@@ -3,26 +3,35 @@
 
 #include <module.h>
 
+#include <module.h>
+
+#if defined(SHARED_DEFINE) && defined(_WIN32)
+    #ifdef NETWORK_LIBRARY
+        #define NETWORK_EXPORT __declspec(dllexport)
+    #else
+        #define NETWORK_EXPORT __declspec(dllimport)
+    #endif
+#else
+    #define NETWORK_EXPORT
+#endif
+
+class NetworkSystem;
+
 class Network : public Module {
 public:
     Network(Engine *engine);
-
     ~Network();
 
-    const char *description() const;
+    const char *metaInfo() const override;
 
-    const char *version() const;
-
-    uint8_t types() const;
-
-    System *system();
+    void *getObject(const char *name) override;
 
 protected:
-    Engine *m_pEngine;
+    NetworkSystem *m_pSystem;
 
-    System *m_pSystem;
 };
-#ifdef NEXT_SHARED
+
+#ifdef SHARED_DEFINE
 extern "C" {
     MODULE_EXPORT Module *moduleCreate(Engine *engine);
 }

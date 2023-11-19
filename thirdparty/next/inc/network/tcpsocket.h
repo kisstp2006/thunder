@@ -16,35 +16,19 @@
     Copyright: 2008-2023 Evgeniy Prikazchikov
 */
 
-#ifndef URI_H
-#define URI_H
+#ifndef TCPSOCKET_H
+#define TCPSOCKET_H
 
-#include <string>
-#include <regex>
+#include "socket.h"
 
-#include <global.h>
-
-using namespace std;
-
-class NEXT_LIBRARY_EXPORT Uri {
+class NEXT_LIBRARY_EXPORT TcpSocket : public Socket {
 public:
-    Uri(const string &uri);
+    TcpSocket();
 
-    string scheme() const;
-    string host() const;
-    string path() const;
-    string query() const;
-    string fragment() const;
-    string dir() const;
-    string name() const;
-    string baseName() const;
-    string suffix() const;
+    bool connectToHost(const NetworkAddress &address) override;
 
-private:
-    string m_uri;
-
-    smatch m_result;
+    void disconnectFromHost() override;
 
 };
 
-#endif // URI_H
+#endif // TCPSOCKET_H

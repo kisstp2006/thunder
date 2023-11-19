@@ -14,6 +14,7 @@ Project {
         "../../thirdparty/next/inc",
         "../../thirdparty/next/inc/math",
         "../../thirdparty/next/inc/core",
+        "../../thirdparty/next/inc/network",
         "../../engine/includes",
         "../../engine/includes/resources",
         "../../engine/includes/editor",
@@ -27,22 +28,13 @@ Project {
         Depends { name: "bundle" }
         Depends { name: "next-editor" }
         Depends { name: "engine-editor" }
-        Depends { name: "angelscript-editor" }
-        Depends { name: "Qt"; submodules: ["core", "gui"]; }
         bundle.isBundle: false
 
-        cpp.defines: ["NEXT_SHARED"]
+        cpp.defines: ["SHARED_DEFINE", "NETWORK_LIBRARY"]
         cpp.includePaths: network.incPaths
-        cpp.cxxLanguageVersion: "c++14"
-        cpp.minimumMacosVersion: "10.12"
-        cpp.cxxStandardLibrary: "libc++"
-
-        Properties {
-            condition: qbs.targetOS.contains("windows")
-            cpp.dynamicLibraries: outer.concat([
-                "Ws2_32"
-            ])
-        }
+        cpp.cxxLanguageVersion: network.languageVersion
+        cpp.cxxStandardLibrary: network.standardLibrary
+        cpp.minimumMacosVersion: network.osxVersion
 
         Properties {
             condition: qbs.targetOS.contains("darwin")
@@ -66,13 +58,13 @@ Project {
         bundle.isBundle: false
 
         cpp.includePaths: network.incPaths
-        cpp.cxxLanguageVersion: "c++14"
-        cpp.minimumMacosVersion: "10.12"
-        cpp.minimumIosVersion: "10.0"
-        cpp.minimumTvosVersion: "10.0"
-        cpp.cxxStandardLibrary: "libc++"
-        cpp.debugInformation: qbs.buildVariant === "release"
-        cpp.separateDebugInformation: cpp.debugInformation
+        cpp.cxxLanguageVersion: network.languageVersion
+        cpp.cxxStandardLibrary: network.standardLibrary
+        cpp.minimumMacosVersion: network.osxVersion
+        cpp.minimumIosVersion: network.iosVersion
+        cpp.minimumTvosVersion: network.tvosVersion
+        cpp.debugInformation: true
+        cpp.separateDebugInformation: qbs.buildVariant === "release"
 
         Properties {
             condition: !network.desktop
@@ -85,13 +77,8 @@ Project {
 
         Properties {
             condition: qbs.targetOS.contains("android")
-            Android.ndk.appStl: "gnustl_static"
+            Android.ndk.appStl: network.ANDROID_STL
             Android.ndk.platform: network.ANDROID
-        }
-
-        Properties {
-            condition: qbs.targetOS.contains("darwin")
-            cpp.weakFrameworks: ["OpenAL"]
         }
 
         Group {

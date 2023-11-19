@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <memory>
 
-#include "address.h"
+#include <networkaddress.h>
 #include "socket.h"
 
 class Connection {
@@ -25,7 +25,7 @@ public:
 
     void listen();
 
-    void connect(const Address &address);
+    void connect(const NetworkAddress &address);
 
     bool isRunning() const;
 
@@ -55,9 +55,9 @@ protected:
 
 private:
     void clearData() {
-        m_State = Disconnected;
-        m_TimeoutAccumulator = 0.0f;
-        m_Address = Address();
+        m_state = Disconnected;
+        m_timeoutAccumulator = 0.0f;
+        m_address = NetworkAddress();
     }
 
     enum State {
@@ -68,15 +68,19 @@ private:
         Connected
     };
 
-    uint32_t m_ProtocolId;
-    float m_Timeout;
-    float m_TimeoutAccumulator;
+    Socket m_socket;
+    NetworkAddress m_address;
 
-    bool m_Running;
-    Mode m_Mode;
-    State m_State;
-    Socket m_Socket;
-    Address m_Address;
+    Mode m_mode;
+    State m_state;
+
+    uint32_t m_protocolId;
+
+    float m_timeout;
+    float m_timeoutAccumulator;
+
+    bool m_running;
+
 };
 
 #endif // CONNECTION_H

@@ -15,6 +15,7 @@ Project {
         "../thirdparty/next/inc/core",
         "../thirdparty/next/inc/math",
         "../thirdparty/next/inc/anim",
+        "../thirdparty/next/inc/network",
         "../engine/includes",
         "../engine/includes/resources",
     ]
