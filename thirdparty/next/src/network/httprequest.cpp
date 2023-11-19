@@ -35,10 +35,3 @@ HttpReply *HttpRequest::get() {
 
     return result;
 }
-
-HttpReply *HttpRequest::post(const ByteArray &data) {
-    HttpReply *result = new HttpReply;
-    result->setRequest("POST", *this);
-
-    return result;
-}

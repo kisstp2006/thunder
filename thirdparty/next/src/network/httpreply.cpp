@@ -33,6 +33,12 @@ void HttpReply::setRequest(const string &operation, const HttpRequest &request) 
 
                 m_state = ReplyState::ReadingCode;
                 readAnswer();
+                if(m_state == ReplyState::ReadingContent) {
+                    while(m_content.size() < m_contentSize) {
+                        readAnswer();
+                    }
+                    m_state = ReplyState::Done;
+                }
             }
         }
     } else if(scheme == "https") {
@@ -97,7 +103,7 @@ void HttpReply::readAnswer() {
                     }
                 } break;
                 case ReplyState::ReadingContent: {
-                    m_content.append(it);
+                    m_content.insert(m_content.end(), it.begin(), it.end());
                 } break;
                 default: break;
                 }

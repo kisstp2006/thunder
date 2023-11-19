@@ -35,7 +35,6 @@ public:
     Url url() const;
 
     HttpReply *get();
-    HttpReply *post(const ByteArray &data);
 
     string header() const;
 

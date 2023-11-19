@@ -53,7 +53,7 @@ protected:
 
     TcpSocket m_socket;
 
-    string m_content;
+    ByteArray m_content;
 
     map<string, string> m_fields;
 
