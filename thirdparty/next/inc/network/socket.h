@@ -23,21 +23,22 @@
 
 #define PLATFORM_WINDOWS  1
 #define PLATFORM_MAC      2
-#define PLATFORM_UNIX     3
+#define PLATFORM_LINUX    3
 
 #if defined(_WIN32)
 #define PLATFORM PLATFORM_WINDOWS
 #elif defined(__APPLE__)
 #define PLATFORM PLATFORM_MAC
 #else
-#define PLATFORM PLATFORM_UNIX
+#define PLATFORM PLATFORM_LINUX
 #endif
 
 #if PLATFORM == PLATFORM_WINDOWS
     #include <winsock2.h>
-#elif PLATFORM == PLATFORM_MAC || PLATFORM == PLATFORM_UNIX
+#elif PLATFORM == PLATFORM_MAC || PLATFORM == PLATFORM_LINUX
     #include <sys/socket.h>
     #include <netinet/in.h>
+    #include <netdb.h>
     #include <fcntl.h>
 #else
     #error unsupported platform!

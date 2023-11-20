@@ -56,7 +56,7 @@ bool Socket::bind(const NetworkAddress &address) {
     }
 
     // set non-blocking io
-//#if PLATFORM == PLATFORM_MAC || PLATFORM == PLATFORM_UNIX
+//#if PLATFORM == PLATFORM_MAC || PLATFORM == PLATFORM_LINUX
 //    int nonBlocking = 1;
 //    if(fcntl(m_socket, F_SETFL, O_NONBLOCK, nonBlocking) == -1) {
 //        close();
@@ -85,7 +85,7 @@ void Socket::disconnectFromHost() {
 
 void Socket::close() {
     if(m_socket != 0) {
-#if PLATFORM == PLATFORM_MAC || PLATFORM == PLATFORM_UNIX
+#if PLATFORM == PLATFORM_MAC || PLATFORM == PLATFORM_LINUX
         ::close(m_socket);
 #elif PLATFORM == PLATFORM_WINDOWS
         ::closesocket(m_socket);
@@ -100,7 +100,7 @@ bool Socket::isValid() const {
 
 bool Socket::isDataAvailable() const {
     u_long flag = 0;
-#if PLATFORM == PLATFORM_MAC || PLATFORM == PLATFORM_UNIX
+#if PLATFORM == PLATFORM_MAC || PLATFORM == PLATFORM_LINUX
     ::ioctl(m_socket, FIONREAD, &flag);
 #elif PLATFORM == PLATFORM_WINDOWS
     ::ioctlsocket(m_socket, FIONREAD, &flag);
