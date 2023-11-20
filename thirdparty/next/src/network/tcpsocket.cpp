@@ -36,5 +36,5 @@ bool TcpSocket::connectToHost(const NetworkAddress &address) {
 }
 
 void TcpSocket::disconnectFromHost() {
-    ::closesocket(m_socket);
+    close();
 }
