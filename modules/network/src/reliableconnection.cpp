@@ -1,5 +1,7 @@
 #include "reliableconnection.h"
 
+#include <cstring>
+
 ReliableConnection::ReliableConnection(uint32_t protocolId, float timeout, uint32_t maxSequence)
         : Connection(protocolId, timeout),
         m_ReliabilitySystem(maxSequence) {
