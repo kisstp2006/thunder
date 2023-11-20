@@ -2,6 +2,8 @@
 
 #include "networksystem.h"
 
+#include <cstring>
+
 #ifdef SHARED_DEFINE
 Module *moduleCreate(Engine *engine) {
     return new Network(engine);
