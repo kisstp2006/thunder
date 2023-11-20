@@ -20,7 +20,7 @@
 
 #include "socket.h"
 
-#include <memory>
+#include <cstring>
 
 NetworkAddress::NetworkAddress() :
         m_address(0),
