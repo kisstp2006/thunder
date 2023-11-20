@@ -1,5 +1,7 @@
 #include "connection.h"
 
+#include <cstring>
+
 Connection::Connection(uint32_t protocolId, float timeout) {
     m_protocolId = protocolId;
     m_timeout = timeout;
