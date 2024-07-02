@@ -191,9 +191,9 @@ QString AssetManager::assetTypeName(const QFileInfo &source) {
     QString path = source.filePath();
 
     QString sub;
-    if(source.suffix().isEmpty()) {
-        path = source.path();
-        sub = source.fileName();
+    if(info.suffix().isEmpty()) {
+        path = info.path();
+        sub = info.fileName();
     }
     AssetConverterSettings *settings = fetchSettings(path);
     if(settings) {
