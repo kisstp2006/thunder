@@ -12,6 +12,7 @@ class PostProcessVolume;
 
 #if defined(SHARED_DEFINE)
 class QWindow;
+class Viewport;
 #endif
 
 class ENGINE_EXPORT RenderSystem : public System {

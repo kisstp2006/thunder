@@ -25,7 +25,8 @@ class ENGINE_EXPORT Viewport : public QWidget {
 public:
     Viewport(QWidget *parent = 0);
 
-    virtual void init();
+    void init();
+    virtual void onDraw();
 
     CameraController *controller();
     void setController(CameraController *ctrl);
@@ -84,8 +85,6 @@ protected:
 
 protected slots:
     void onApplySettings();
-
-    virtual void onDraw();
 
     void onBufferMenu();
 

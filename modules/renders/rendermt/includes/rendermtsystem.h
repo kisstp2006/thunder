@@ -21,7 +21,7 @@ public:
     void setCurrentView(MTK::View *view, MTL::CommandBuffer *cmd);
 
 #ifdef SHARED_DEFINE
-    QWindow *createRhiWindow() override;
+    QWindow *createRhiWindow(Viewport *viewport) override;
 
     ByteArray renderOffscreen(World *world, int width, int height) override;
 #endif

@@ -29,6 +29,7 @@ Project {
         files: {
             var sources = srcFiles
             sources.push("src/editor/*.cpp")
+            sources.push("src/editor/*.mm")
             sources.push("includes/editor/*.h")
             return sources
         }
@@ -37,7 +38,7 @@ Project {
         Depends { name: "next-editor" }
         Depends { name: "engine-editor" }
         Depends { name: "glfw-editor" }
-        Depends { name: "Qt"; submodules: ["core", "gui"]; }
+        Depends { name: "Qt"; submodules: ["core", "gui", "widgets"]; }
         bundle.isBundle: false
 
         cpp.defines: ["SHARED_DEFINE"]
@@ -47,6 +48,8 @@ Project {
         cpp.minimumMacosVersion: rendermt.osxVersion
         cpp.sonamePrefix: "@executable_path"
         cpp.weakFrameworks: ["Metal", "MetalKit"]
+        cpp.objcFlags: ["-fmodules", "-fcxx-modules"]
+        cpp.objcxxFlags: ["-fmodules", "-fcxx-modules"]
 
         Group {
             name: "Install Dynamic RenderMT"

@@ -20,6 +20,10 @@ public:
 
     void setLevel(uint32_t level);
 
+    void setClearColor(const Vector4 &color);
+
+    void setClearDepth(float depth);
+
 private:
     MTL::RenderPassDescriptor *m_descriptor;
 

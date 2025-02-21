@@ -68,3 +68,11 @@ void RenderTargetMt::setNativeHandle(MTL::RenderPassDescriptor *descriptor) {
 void RenderTargetMt::setLevel(uint32_t level) {
     m_currentLevel = level;
 }
+
+void RenderTargetMt::setClearColor(const Vector4 &color) {
+
+}
+
+void RenderTargetMt::setClearDepth(float depth) {
+
+}

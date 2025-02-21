@@ -7,7 +7,6 @@
 #include "resources/rendertargetmt.h"
 #include "resources/computeshadermt.h"
 
-#include <log.h>
 #include <timer.h>
 
 CommandBufferMt::CommandBufferMt() :
@@ -21,7 +20,6 @@ void CommandBufferMt::begin(MTL::CommandBuffer *cmd) {
     PROFILE_FUNCTION();
 
     m_commandBuffer = cmd;
-    //m_commandBuffer->renderCommandEncoder(rpd);
 
     m_global.time = Timer::time();
     m_global.deltaTime = Timer::deltaTime();
@@ -31,12 +29,24 @@ void CommandBufferMt::begin(MTL::CommandBuffer *cmd) {
 }
 
 void CommandBufferMt::end() {
-
+    if(m_encoder) {
+        m_encoder->endEncoding();
+        m_encoder = nullptr;
+    }
 }
 
 void CommandBufferMt::clearRenderTarget(bool clearColor, const Vector4 &color, bool clearDepth, float depth) {
     PROFILE_FUNCTION();
 
+    if(m_encoder) {
+        if(clearColor) {
+            m_currentTarget->setClearColor(color);
+        }
+
+        if(clearDepth) {
+            m_currentTarget->setClearDepth(depth);
+        }
+    }
 }
 
 void CommandBufferMt::dispatchCompute(ComputeInstance *shader, int32_t groupsX, int32_t groupsY, int32_t groupsZ) {
@@ -59,7 +69,7 @@ void CommandBufferMt::dispatchCompute(ComputeInstance *shader, int32_t groupsX, 
 void CommandBufferMt::drawMesh(Mesh *mesh, uint32_t sub, uint32_t layer, MaterialInstance &instance) {
     PROFILE_FUNCTION();
 
-    if(mesh) {
+    if(mesh && m_encoder) {
         MeshMt *meshMt = static_cast<MeshMt *>(mesh);
 
         MaterialInstanceMt &instanceMt = static_cast<MaterialInstanceMt &>(instance);
@@ -76,7 +86,7 @@ void CommandBufferMt::drawMesh(Mesh *mesh, uint32_t sub, uint32_t layer, Materia
 
                 MTL::PrimitiveType primitiveType = instance.material()->wireframe() ? MTL::PrimitiveTypeLine : MTL::PrimitiveTypeTriangle;
                 m_encoder->drawIndexedPrimitives(primitiveType, index, MTL::IndexTypeUInt32, meshMt->indexBuffer(),
-                                                     meshMt->indexStart(sub), instance.instanceCount(), 0, 0);
+                                                 meshMt->indexStart(sub), instance.instanceCount(), 0, 0);
 
                 PROFILER_STAT(POLYGONS, (index / 3) * count);
             }
@@ -93,15 +103,12 @@ void CommandBufferMt::setRenderTarget(RenderTarget *target, uint32_t level) {
 
     if(m_currentTarget) {
         m_currentTarget->setLevel(level);
+
+        if(m_encoder) {
+            m_encoder->endEncoding();
+        }
+        m_encoder = m_commandBuffer->renderCommandEncoder(m_currentTarget->nativeHandle());
     }
-}
-
-void CommandBufferMt::resetViewProjection() {
-    PROFILE_FUNCTION();
-
-    CommandBuffer::resetViewProjection();
-
-    m_globalBuffer->didModifyRange(NS::Range::Make(0, sizeof(Global)));
 }
 
 void CommandBufferMt::setViewProjection(const Matrix4 &view, const Matrix4 &projection) {
@@ -115,15 +122,21 @@ void CommandBufferMt::setViewProjection(const Matrix4 &view, const Matrix4 &proj
 void CommandBufferMt::setViewport(int32_t x, int32_t y, int32_t width, int32_t height) {
     CommandBuffer::setViewport(x, y, width, height);
 
-    m_encoder->setViewport({(float)m_viewportX, (float)m_viewportY, (float)m_viewportWidth, (float)m_viewportHeight, 0.0f, 1.0f});
+    if(m_encoder) {
+        m_encoder->setViewport({(float)m_viewportX, (float)m_viewportY, (float)m_viewportWidth, (float)m_viewportHeight, 0.0f, 1.0f});
+    }
 }
 
 void CommandBufferMt::enableScissor(int32_t x, int32_t y, int32_t width, int32_t height) {
-    m_encoder->setScissorRect({(uint32_t)x, (uint32_t)y, (uint32_t)width, (uint32_t)height});
+    if(m_encoder) {
+        m_encoder->setScissorRect({(uint32_t)x, (uint32_t)y, (uint32_t)width, (uint32_t)height});
+    }
 }
 
 void CommandBufferMt::disableScissor() {
-    m_encoder->setScissorRect({(uint32_t)m_viewportX, (uint32_t)m_viewportY, (uint32_t)m_viewportWidth, (uint32_t)m_viewportHeight});
+    if(m_encoder) {
+        m_encoder->setScissorRect({(uint32_t)m_viewportX, (uint32_t)m_viewportY, (uint32_t)m_viewportWidth, (uint32_t)m_viewportHeight});
+    }
 }
 
 void CommandBufferMt::beginDebugMarker(const char *name) {

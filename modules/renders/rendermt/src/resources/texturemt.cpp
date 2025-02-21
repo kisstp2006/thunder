@@ -84,12 +84,12 @@ void TextureMt::uploadTexture(uint32_t slice) {
 }
 
 MTL::PixelFormat TextureMt::pixelFormat() {
-    switch(format()) {
+    switch(m_format) {
     case R8: return MTL::PixelFormatR8Unorm;
     case RGB10A2: return MTL::PixelFormatRGB10A2Unorm;
     case RGBA32Float: return MTL::PixelFormatRGBA32Float;
     case R11G11B10Float: return MTL::PixelFormatRG11B10Float;
-    case Depth: return (depthBits() == 16) ? MTL::PixelFormatDepth16Unorm : MTL::PixelFormatDepth24Unorm_Stencil8;
+    case Depth: return (m_depth == 16) ? MTL::PixelFormatDepth16Unorm : MTL::PixelFormatDepth32Float_Stencil8;
     default: break;
     }
 

@@ -63,7 +63,7 @@ Viewport::Viewport(QWidget *parent) :
 void Viewport::init() {
     m_renderSystem = (m_gameView) ? Engine::renderSystem() : PluginManager::instance()->createRenderer();
 
-    m_rhiWindow = m_renderSystem->createRhiWindow();
+    m_rhiWindow = m_renderSystem->createRhiWindow(this);
 
     if(m_rhiWindow) {
         static bool first = true;
@@ -75,8 +75,6 @@ void Viewport::init() {
 
         m_rhiWindow->installEventFilter(this);
         layout()->addWidget(QWidget::createWindowContainer(m_rhiWindow));
-
-        connect(m_rhiWindow, SIGNAL(draw()), this, SLOT(onDraw()), Qt::DirectConnection);
 
         PipelineContext *pipelineContext = m_renderSystem->pipelineContext();
         m_guiLayer = pipelineContext->renderTasks().back();

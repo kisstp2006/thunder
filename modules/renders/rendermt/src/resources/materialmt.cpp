@@ -24,7 +24,7 @@ namespace  {
 void MaterialMt::loadUserData(const VariantMap &data) {
     Material::loadUserData(data);
 
-    static map<string, uint32_t> pairs = {
+    static std::map<std::string, uint32_t> pairs = {
         {gVisibility, FragmentVisibility},
         {gDefault, FragmentDefault},
 
@@ -78,7 +78,7 @@ uint32_t MaterialMt::getProgramState(uint16_t type) {
                             uint32_t vertex = buildShader(itv->first, itv->second);
                             uint32_t fragment = buildShader(itf->first, itf->second);
 
-                            vector<uint32_t> shaders = {vertex, fragment};
+                            std::vector<uint32_t> shaders = {vertex, fragment};
                             if(geometry > 0) {
                                 shaders.push_back(geometry);
                             }
@@ -122,7 +122,7 @@ uint32_t MaterialMt::bind(uint32_t layer, uint16_t vertex) {
     return program;
 }
 
-uint32_t MaterialMt::buildShader(uint16_t type, const string &src) {
+uint32_t MaterialMt::buildShader(uint16_t type, const std::string &src) {
     // uint32_t t = 0;
     // if(type >= FragmentDefault && type < FragmentLast) {
     //     t = GL_FRAGMENT_SHADER;

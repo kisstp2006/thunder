@@ -17,8 +17,6 @@
 
 #include <pipelinecontext.h>
 
-#include <log.h>
-
 static int32_t registered = 0;
 
 RenderMtSystem::RenderMtSystem(Engine *engine) :
@@ -71,6 +69,8 @@ bool RenderMtSystem::init() {
 
     bool result = RenderSystem::init();
 
+    CommandBufferMt::setInited();
+
     return result;
 }
 /*!
@@ -102,17 +102,19 @@ void RenderMtSystem::setCurrentView(MTK::View *view, MTL::CommandBuffer *cmd) {
 }
 
 #if defined(SHARED_DEFINE)
+#include "editor/metalwindow.h"
 #include "viewdelegate.h"
 
 #include <QWindow>
+#include <QVariant>
 
-QWindow *RenderMtSystem::createRhiWindow() {
+QWindow *RenderMtSystem::createRhiWindow(Viewport *viewport) {
     CGRect frame = { {0.0, 0.0}, {100.0, 100.0} };
 
     MTL::Device *device = WrapperMt::device();
     MTK::View *view = MTK::View::alloc()->init(frame, device);
-    view->setClearColor(MTL::ClearColor::Make(1.0, 0.0, 0.0, 1.0));
-    view->setDelegate(new ViewDelegate(this));
+
+    view->setDelegate(new ViewDelegate(this, viewport));
 
     return QWindow::fromWinId((WId)view);
 }
