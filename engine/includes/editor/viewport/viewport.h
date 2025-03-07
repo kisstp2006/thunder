@@ -81,6 +81,8 @@ protected:
 
     bool eventFilter(QObject *object, QEvent *event) override;
 
+    bool processEvent(QEvent *event);
+
     void resizeEvent(QResizeEvent *event) override;
 
     void fillTasksMenu(QMenu *menu);

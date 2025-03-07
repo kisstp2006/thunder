@@ -46,7 +46,11 @@ void MaterialGL::loadUserData(const VariantMap &data) {
     for(auto &pair : pairs) {
         auto it = data.find(pair.first);
         if(it != data.end()) {
-            m_shaderSources[pair.second] = (*it).second.toString();
+            auto fields = (*it).second.toList();
+
+            auto field = fields.begin(); // Shader data
+            m_shaderSources[pair.second] = field->toString();
+
         }
     }
 

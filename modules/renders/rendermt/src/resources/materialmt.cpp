@@ -108,7 +108,6 @@ void MaterialMt::loadUserData(const VariantMap &data) {
         desc->setDepthWriteEnabled( m_depthState.writeEnabled );
     }
 
-
     if(m_stencilState.enabled) {
         MTL::StencilDescriptor *front = MTL::StencilDescriptor::alloc()->init();
         front->setStencilCompareFunction( convertCompareFunction(m_stencilState.compareFunctionFront) );
@@ -118,7 +117,7 @@ void MaterialMt::loadUserData(const VariantMap &data) {
         front->setReadMask(m_stencilState.readMask);
         front->setWriteMask(m_stencilState.writeMask);
 
-        //desc->setFrontFaceStencil(front);
+        desc->setFrontFaceStencil(front);
 
         MTL::StencilDescriptor *back = MTL::StencilDescriptor::alloc()->init();
         back->setStencilCompareFunction( convertCompareFunction(m_stencilState.compareFunctionBack) );
@@ -128,7 +127,7 @@ void MaterialMt::loadUserData(const VariantMap &data) {
         back->setReadMask(m_stencilState.readMask);
         back->setWriteMask(m_stencilState.writeMask);
 
-        //desc->setBackFaceStencil(back);
+        desc->setBackFaceStencil(back);
     }
 
     m_depthStencilState = WrapperMt::device()->newDepthStencilState(desc);

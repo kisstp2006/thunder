@@ -56,7 +56,6 @@ PipelineContext::PipelineContext() :
     Material *mtl = Engine::loadResource<Material>(".embedded/DefaultPostEffect.shader");
     if(mtl) {
         m_finalMaterial = mtl->createInstance();
-        m_finalMaterial->setTexture(gTexture, Engine::loadResource<Texture>("img.jpeg"));
     }
 
     setPipeline(Engine::loadResource<Pipeline>(Engine::value(".pipeline", ".embedded/Deferred.pipeline").toString()));

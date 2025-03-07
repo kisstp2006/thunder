@@ -56,7 +56,7 @@ Viewport::Viewport(QWidget *parent) :
     setAutoFillBackground(false);
 
     setMouseTracking(true);
-    setFocusPolicy(Qt::StrongFocus);
+    //setFocusPolicy(Qt::StrongFocus);
 
     QObject::connect(EditorSettings::instance(), &EditorSettings::updated, this, &Viewport::onApplySettings);
 }
@@ -173,7 +173,7 @@ void Viewport::onDraw() {
         auto &instance = EditorPlatform::instance();
 
         instance.setScreenSize(size());
-        bool isFocus = (QGuiApplication::focusWindow() == m_rhiWindow || isActiveWindow());
+        bool isFocus = (QGuiApplication::focusWindow() == m_rhiWindow/* || isActiveWindow()*/);
 
         if(m_gameView) {
             for(auto it : m_world->findChildren<Camera *>()) {
@@ -391,56 +391,8 @@ void Viewport::onPostEffectChanged(bool checked) {
 }
 
 bool Viewport::event(QEvent *event) {
-    switch(event->type()) {
-    case QEvent::DragEnter: emit dragEnter(static_cast<QDragEnterEvent *>(event)); return true;
-    case QEvent::DragLeave: emit dragLeave(static_cast<QDragLeaveEvent *>(event)); return true;
-    case QEvent::DragMove: emit dragMove(static_cast<QDragMoveEvent *>(event)); return true;
-    case QEvent::Drop: emit drop(static_cast<QDropEvent *>(event)); setFocus(); return true;
-    case QEvent::KeyPress: {
-        QKeyEvent *ev = static_cast<QKeyEvent *>(event);
-        EditorPlatform::instance().setKeys(ev->key(), ev->text(), false, ev->isAutoRepeat());
+    if(processEvent(event)) {
         return true;
-    }
-    case QEvent::KeyRelease: {
-        QKeyEvent *ev = static_cast<QKeyEvent *>(event);
-        EditorPlatform::instance().setKeys(ev->key(), "", true, ev->isAutoRepeat());
-        return true;
-    }
-    case QEvent::Wheel: {
-        QWheelEvent *ev = static_cast<QWheelEvent *>(event);
-        int delta = ev->pixelDelta().x();
-        if(delta != 0) {
-            EditorPlatform::instance().setMouseScrollDelta(ev->pixelDelta().x());
-        }
-        return true;
-    }
-    case QEvent::MouseButtonPress: {
-        QMouseEvent *ev = static_cast<QMouseEvent *>(event);
-        EditorPlatform::instance().setScreenSize(size());
-        EditorPlatform::instance().setMousePosition(ev->pos());
-        EditorPlatform::instance().setMouseButtons(ev->button(), PRESS);
-        return true;
-    }
-    case QEvent::MouseButtonRelease: {
-        QMouseEvent *ev = static_cast<QMouseEvent *>(event);
-        EditorPlatform::instance().setMousePosition(ev->pos());
-        EditorPlatform::instance().setMouseButtons(ev->button(), RELEASE);
-        return true;
-    }
-    case QEvent::MouseMove: {
-        QMouseEvent *ev = static_cast<QMouseEvent *>(event);
-        EditorPlatform::instance().setScreenSize(size());
-        EditorPlatform::instance().setMousePosition(ev->pos());
-        return true;
-    }
-    case QEvent::NativeGesture: {
-        QNativeGestureEvent *ev = static_cast<QNativeGestureEvent *>(event);
-        switch(ev->gestureType()) {
-        default: break;
-        }
-        return true;
-    }
-    default: break;
     }
 
     return QWidget::event(event);
@@ -448,11 +400,60 @@ bool Viewport::event(QEvent *event) {
 
 bool Viewport::eventFilter(QObject *object, QEvent *event) {
     bool isFocus = (QGuiApplication::focusWindow() == m_rhiWindow);
-    if(isFocus && Viewport::event(event)) {
+    if(isFocus && processEvent(event)) {
         return true;
     }
 
     return QObject::eventFilter(object, event);
+}
+
+bool Viewport::processEvent(QEvent *event) {
+    switch(event->type()) {
+        case QEvent::DragEnter: emit dragEnter(static_cast<QDragEnterEvent *>(event)); return true;
+        case QEvent::DragLeave: emit dragLeave(static_cast<QDragLeaveEvent *>(event)); return true;
+        case QEvent::DragMove: emit dragMove(static_cast<QDragMoveEvent *>(event)); return true;
+        case QEvent::Drop: emit drop(static_cast<QDropEvent *>(event)); setFocus(); return true;
+        case QEvent::KeyPress: {
+            QKeyEvent *ev = static_cast<QKeyEvent *>(event);
+            EditorPlatform::instance().setKeys(ev->key(), ev->text(), false, ev->isAutoRepeat());
+            return true;
+        }
+        case QEvent::KeyRelease: {
+            QKeyEvent *ev = static_cast<QKeyEvent *>(event);
+            EditorPlatform::instance().setKeys(ev->key(), "", true, ev->isAutoRepeat());
+            return true;
+        }
+        case QEvent::Wheel: {
+            QWheelEvent *ev = static_cast<QWheelEvent *>(event);
+            int delta = ev->pixelDelta().x();
+            if(delta != 0) {
+                EditorPlatform::instance().setMouseScrollDelta(ev->pixelDelta().x());
+            }
+            return true;
+        }
+        case QEvent::MouseButtonPress: {
+            QMouseEvent *ev = static_cast<QMouseEvent *>(event);
+            EditorPlatform::instance().setScreenSize(size());
+            EditorPlatform::instance().setMousePosition(ev->pos());
+            EditorPlatform::instance().setMouseButtons(ev->button(), PRESS);
+            return true;
+        }
+        case QEvent::MouseButtonRelease: {
+            QMouseEvent *ev = static_cast<QMouseEvent *>(event);
+            EditorPlatform::instance().setMousePosition(ev->pos());
+            EditorPlatform::instance().setMouseButtons(ev->button(), RELEASE);
+            return true;
+        }
+        case QEvent::MouseMove: {
+            QMouseEvent *ev = static_cast<QMouseEvent *>(event);
+            EditorPlatform::instance().setScreenSize(size());
+            EditorPlatform::instance().setMousePosition(ev->pos());
+            return true;
+        }
+        default: break;
+    }
+
+    return false;
 }
 
 void Viewport::resizeEvent(QResizeEvent *event) {

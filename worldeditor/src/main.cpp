@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
     QCoreApplication::setApplicationName(EDITOR_NAME);
     QCoreApplication::setApplicationVersion(SDK_VERSION);
 
-    qputenv(qPrintable(gRhi), "RenderMT");
+    //qputenv(qPrintable(gRhi), "RenderMT");
 
     QFile qss(":/Style/styles/dark/style.qss");
     if(qss.open(QIODevice::ReadOnly)) {
