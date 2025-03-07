@@ -16,7 +16,7 @@ ViewDelegate::ViewDelegate(RenderMtSystem *system, Viewport *viewport) :
 
 void ViewDelegate::drawInMTKView(MTK::View *view) {
     NS::AutoreleasePool *pool = NS::AutoreleasePool::alloc()->init();
-
+#if defined(SHARED_DEFINE)
     NS::String* _pTraceSaveFilePath;
     if(frame == -1) {
         MTL::CaptureManager* pCaptureManager = MTL::CaptureManager::sharedCaptureManager();
@@ -55,7 +55,7 @@ void ViewDelegate::drawInMTKView(MTK::View *view) {
         m_captureInprogress = true;
     }
     frame++;
-
+#endif
     MTL::CommandBuffer *cmd = m_queue->commandBuffer();
 
     m_render->setCurrentView(view, cmd);
@@ -66,7 +66,7 @@ void ViewDelegate::drawInMTKView(MTK::View *view) {
 #endif
     cmd->presentDrawable(view->currentDrawable());
     cmd->commit();
-
+#if defined(SHARED_DEFINE)
     if(m_captureInprogress) {
         MTL::CaptureManager* pCaptureManager = MTL::CaptureManager::sharedCaptureManager();
         pCaptureManager->stopCapture();
@@ -76,6 +76,7 @@ void ViewDelegate::drawInMTKView(MTK::View *view) {
 
         m_captureInprogress = false;
     }
+#endif
 
     pool->release();
 }
