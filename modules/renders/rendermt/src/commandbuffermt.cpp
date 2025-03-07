@@ -104,7 +104,6 @@ void CommandBufferMt::setRenderTarget(RenderTarget *target, uint32_t level) {
 
         if(m_encoder) {
             m_encoder->endEncoding();
-            //m_encoder->release();
         }
         m_encoder = m_commandBuffer->renderCommandEncoder(m_currentTarget->nativeHandle());
         m_encoder->setLabel(NS::String::string(target->name().c_str(), NS::UTF8StringEncoding));

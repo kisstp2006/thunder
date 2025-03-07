@@ -56,7 +56,9 @@ Viewport::Viewport(QWidget *parent) :
     setAutoFillBackground(false);
 
     setMouseTracking(true);
-    //setFocusPolicy(Qt::StrongFocus);
+#ifdef Q_OS_MACOS
+    setFocusPolicy(Qt::StrongFocus);
+#endif
 
     QObject::connect(EditorSettings::instance(), &EditorSettings::updated, this, &Viewport::onApplySettings);
 }
@@ -173,7 +175,11 @@ void Viewport::onDraw() {
         auto &instance = EditorPlatform::instance();
 
         instance.setScreenSize(size());
-        bool isFocus = (QGuiApplication::focusWindow() == m_rhiWindow/* || isActiveWindow()*/);
+        bool isFocus = (QGuiApplication::focusWindow() == m_rhiWindow
+#ifdef Q_OS_MACOS
+                        || isActiveWindow()
+#endif
+                        );
 
         if(m_gameView) {
             for(auto it : m_world->findChildren<Camera *>()) {
