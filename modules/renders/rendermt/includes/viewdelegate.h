@@ -20,6 +20,10 @@ private:
 
     MTL::CommandQueue *m_queue;
 
+    bool m_captureInprogress = false;
+
+    int frame = 0;
+
 };
 
 #endif // VIEWDELEGATE_H

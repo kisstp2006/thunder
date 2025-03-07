@@ -5,7 +5,8 @@
 #include "commandbuffermt.h"
 
 RenderTargetMt::RenderTargetMt() :
-        m_descriptor(nullptr) {
+        m_descriptor(nullptr),
+        m_native(false) {
 
 }
 
@@ -35,6 +36,8 @@ MTL::RenderPassDescriptor *RenderTargetMt::nativeHandle() {
                     MTL::RenderPassColorAttachmentDescriptor *desc = MTL::RenderPassColorAttachmentDescriptor::alloc()->init();
                     desc->setLevel(m_currentLevel);
                     desc->setTexture(handle);
+                    desc->setLoadAction((clearFlags() & ClearColor) ? MTL::LoadActionClear : MTL::LoadActionLoad);
+                    desc->setStoreAction(MTL::StoreActionStore);
 
                     m_descriptor->colorAttachments()->setObject(desc, i);
                 }
@@ -47,6 +50,8 @@ MTL::RenderPassDescriptor *RenderTargetMt::nativeHandle() {
                 MTL::RenderPassDepthAttachmentDescriptor *desc = MTL::RenderPassDepthAttachmentDescriptor::alloc()->init();
                 desc->setLevel(m_currentLevel);
                 desc->setTexture(handle);
+                desc->setLoadAction((clearFlags() & ClearDepth) ? MTL::LoadActionClear : MTL::LoadActionLoad);
+                desc->setStoreAction(MTL::StoreActionStore);
 
                 m_descriptor->setDepthAttachment(desc);
             }
@@ -60,19 +65,21 @@ MTL::RenderPassDescriptor *RenderTargetMt::nativeHandle() {
 }
 
 void RenderTargetMt::setNativeHandle(MTL::RenderPassDescriptor *descriptor) {
-    m_descriptor = descriptor;
+    if(m_descriptor != descriptor) {
+        m_descriptor = descriptor;
+        m_native = true;
 
-    setState(Ready);
+        setState(Ready);
+    }
 }
 
 void RenderTargetMt::setLevel(uint32_t level) {
     m_currentLevel = level;
+    if(m_descriptor) {
+        m_descriptor->colorAttachments()->object(0)->setLevel(m_currentLevel);
+    }
 }
 
-void RenderTargetMt::setClearColor(const Vector4 &color) {
-
-}
-
-void RenderTargetMt::setClearDepth(float depth) {
-
+bool RenderTargetMt::isNative() const {
+    return m_native;
 }

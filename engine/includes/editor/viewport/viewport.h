@@ -77,6 +77,8 @@ signals:
     void screenshot(QImage);
 
 protected:
+    bool event(QEvent *event) override;
+
     bool eventFilter(QObject *object, QEvent *event) override;
 
     void resizeEvent(QResizeEvent *event) override;

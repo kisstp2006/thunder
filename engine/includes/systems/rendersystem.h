@@ -46,7 +46,7 @@ public:
     static std::list<PostProcessVolume *> &postProcessVolumes();
 
 #if defined(SHARED_DEFINE)
-    virtual QWindow *createRhiWindow();
+    virtual QWindow *createRhiWindow(Viewport *viewport);
 #endif
 
 private:

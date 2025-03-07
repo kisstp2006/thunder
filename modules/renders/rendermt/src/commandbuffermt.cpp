@@ -11,8 +11,7 @@
 
 CommandBufferMt::CommandBufferMt() :
         m_commandBuffer(nullptr),
-        m_encoder(nullptr),
-        m_globalBuffer(WrapperMt::device()->newBuffer(&m_global, sizeof(Global), MTL::ResourceStorageModeManaged)) {
+        m_encoder(nullptr) {
 
 }
 
@@ -24,29 +23,22 @@ void CommandBufferMt::begin(MTL::CommandBuffer *cmd) {
     m_global.time = Timer::time();
     m_global.deltaTime = Timer::deltaTime();
     m_global.clip = 0.1f;
-
-    m_globalBuffer->didModifyRange(NS::Range::Make(0, sizeof(Global)));
 }
 
 void CommandBufferMt::end() {
     if(m_encoder) {
         m_encoder->endEncoding();
+        //m_encoder->release();
         m_encoder = nullptr;
     }
 }
 
-void CommandBufferMt::clearRenderTarget(bool clearColor, const Vector4 &color, bool clearDepth, float depth) {
-    PROFILE_FUNCTION();
+MTL::RenderCommandEncoder *CommandBufferMt::encoder() const {
+    return m_encoder;
+}
 
-    if(m_encoder) {
-        if(clearColor) {
-            m_currentTarget->setClearColor(color);
-        }
-
-        if(clearDepth) {
-            m_currentTarget->setClearDepth(depth);
-        }
-    }
+RenderTargetMt *CommandBufferMt::currentRenderTarget() const {
+    return m_currentTarget;
 }
 
 void CommandBufferMt::dispatchCompute(ComputeInstance *shader, int32_t groupsX, int32_t groupsY, int32_t groupsZ) {
@@ -73,18 +65,24 @@ void CommandBufferMt::drawMesh(Mesh *mesh, uint32_t sub, uint32_t layer, Materia
         MeshMt *meshMt = static_cast<MeshMt *>(mesh);
 
         MaterialInstanceMt &instanceMt = static_cast<MaterialInstanceMt &>(instance);
-        if(instanceMt.bind(this, layer)) {
+        if(instanceMt.bind(*this, layer, m_global)) {
+            meshMt->bind(m_encoder, 2);
+
+            bool wire = instance.material()->wireframe();
+
+            m_encoder->setTriangleFillMode(wire ? MTL::TriangleFillModeLines : MTL::TriangleFillModeFill);
+
             if(meshMt->indices().empty()) {
                 uint32_t vert = meshMt->vertices().size();
 
-                MTL::PrimitiveType primitiveType = instance.material()->wireframe() ? MTL::PrimitiveTypeLineStrip : MTL::PrimitiveTypeTriangleStrip;
+                MTL::PrimitiveType primitiveType = wire ? MTL::PrimitiveTypeLineStrip : MTL::PrimitiveTypeTriangleStrip;
                 m_encoder->drawPrimitives(primitiveType, 0, vert, instance.instanceCount(), 0);
 
                 PROFILER_STAT(POLYGONS, index - 2 * count);
             } else {
                 int32_t index = meshMt->indexCount(sub);
 
-                MTL::PrimitiveType primitiveType = instance.material()->wireframe() ? MTL::PrimitiveTypeLine : MTL::PrimitiveTypeTriangle;
+                MTL::PrimitiveType primitiveType = wire ? MTL::PrimitiveTypeLine : MTL::PrimitiveTypeTriangle;
                 m_encoder->drawIndexedPrimitives(primitiveType, index, MTL::IndexTypeUInt32, meshMt->indexBuffer(),
                                                  meshMt->indexStart(sub), instance.instanceCount(), 0, 0);
 
@@ -106,17 +104,11 @@ void CommandBufferMt::setRenderTarget(RenderTarget *target, uint32_t level) {
 
         if(m_encoder) {
             m_encoder->endEncoding();
+            //m_encoder->release();
         }
         m_encoder = m_commandBuffer->renderCommandEncoder(m_currentTarget->nativeHandle());
+        m_encoder->setLabel(NS::String::string(target->name().c_str(), NS::UTF8StringEncoding));
     }
-}
-
-void CommandBufferMt::setViewProjection(const Matrix4 &view, const Matrix4 &projection) {
-    PROFILE_FUNCTION();
-
-    CommandBuffer::setViewProjection(view, projection);
-
-    m_globalBuffer->didModifyRange(NS::Range::Make(0, sizeof(Global)));
 }
 
 void CommandBufferMt::setViewport(int32_t x, int32_t y, int32_t width, int32_t height) {

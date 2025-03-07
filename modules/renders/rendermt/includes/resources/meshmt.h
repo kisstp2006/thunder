@@ -19,19 +19,31 @@ class MeshMt : public Mesh {
 public:
     MeshMt();
 
-    MTL::Buffer *vertexBuffer();
-
     MTL::Buffer *indexBuffer();
 
-protected:
-    void bind();
+    void bind(MTL::RenderCommandEncoder *encoder, int uniformOffset);
 
+protected:
     void update();
 
 protected:
     MTL::Buffer *m_vertexBuffer;
 
     MTL::Buffer *m_indexBuffer;
+
+    uint32_t m_vertexSize;
+
+    uint32_t m_uvSize;
+
+    uint32_t m_colorSize;
+
+    uint32_t m_normalsSize;
+
+    uint32_t m_tangentsSize;
+
+    uint32_t m_weightsSize;
+
+    uint32_t m_bonesSize;
 
 };
 

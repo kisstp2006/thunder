@@ -11,6 +11,9 @@
 #include "wrappermt.h"
 
 class CommandBufferMt;
+class RenderTargetMt;
+
+class Global;
 
 class MaterialInstanceMt : public MaterialInstance {
 public:
@@ -18,25 +21,23 @@ public:
 
     ~MaterialInstanceMt();
 
-    bool bind(CommandBufferMt *buffer, uint32_t layer);
+    bool bind(CommandBufferMt &buffer, uint32_t layer, const Global &global);
 
 private:
-    static void setBlendState(const Material::BlendState &state);
-
-    static void setRasterState(const Material::RasterState &state);
-
-    static void setDepthState(const Material::DepthState &state);
-
-    static void setStencilState(const Material::StencilState &state);
+    void createPipeline(RenderTargetMt *target);
 
 private:
-    Material::BlendState m_blendState;
-
-    Material::DepthState m_depthState;
-
-    Material::StencilState m_stencilState;
-
     MTL::Buffer *m_instanceBuffer;
+
+    MTL::Buffer *m_globalBuffer;
+
+    MTL::RenderPipelineState *m_pso;
+
+    int32_t m_globalVertextLocation;
+    int32_t m_localVertextLocation;
+
+    int32_t m_globalFragmentLocation;
+    int32_t m_localFragmentLocation;
 
 };
 
@@ -47,47 +48,46 @@ class MaterialMt : public Material {
     A_NOMETHODS()
     A_NOENUMS()
 
-    enum ShaderType {
-        VertexStatic      = 1,
-        VertexSkinned,
-        VertexParticle,
-        VertexLast,
+    struct Attribute {
+        int32_t location;
 
-        FragmentDefault,
-        FragmentVisibility,
-        FragmentLast,
-
-        GeometryDefault,
-        GeometryLast
+        uint32_t format;
     };
 
-    typedef std::unordered_map<uint32_t, uint32_t> ObjectMap;
+    struct Uniform {
+        std::string name;
+
+        int32_t location;
+    };
+
+    struct Shader {
+        std::vector<Attribute> attributes;
+
+        std::vector<Uniform> uniforms;
+
+        MTL::Function *function;
+    };
 
 public:
     void loadUserData(const VariantMap &data) override;
 
-    uint32_t bind(uint32_t layer, uint16_t vertex);
-
-    uint32_t getProgramState(uint16_t type);
+    Shader *shader(uint16_t type);
 
     Textures &textures() { return m_textures; }
 
+    MTL::DepthStencilState *depthStencilState() const { return m_depthStencilState; }
+
 protected:
-    uint32_t buildShader(uint16_t type, const std::string &src = std::string());
+    MTL::Function *buildShader(const std::string &src) const;
 
     MaterialInstance *createInstance(SurfaceType type = SurfaceType::Static) override;
-
-    static void setDepthState(const DepthState &state);
-
-    static void setStencilState(const StencilState &state);
 
 private:
     friend class MaterialInstanceMt;
 
-    ObjectMap m_programs;
+    std::unordered_map<uint16_t, Shader> m_pipelineFunctions;
 
-    std::map<uint16_t, std::string> m_shaderSources;
-
+    MTL::DepthStencilState *m_depthStencilState;
 };
 
 #endif // MATERIALMT_H

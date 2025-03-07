@@ -46,7 +46,7 @@ PipelineContext::PipelineContext() :
         m_pipeline(nullptr),
         m_buffer(Engine::objectCreate<CommandBuffer>()),
         m_finalMaterial(nullptr),
-        m_defaultTarget(Engine::objectCreate<RenderTarget>()),
+        m_defaultTarget(Engine::objectCreate<RenderTarget>("defaultTarget")),
         m_camera(nullptr),
         m_width(64),
         m_height(64),
@@ -56,6 +56,7 @@ PipelineContext::PipelineContext() :
     Material *mtl = Engine::loadResource<Material>(".embedded/DefaultPostEffect.shader");
     if(mtl) {
         m_finalMaterial = mtl->createInstance();
+        m_finalMaterial->setTexture(gTexture, Engine::loadResource<Texture>("img.jpeg"));
     }
 
     setPipeline(Engine::loadResource<Pipeline>(Engine::value(".pipeline", ".embedded/Deferred.pipeline").toString()));
@@ -94,14 +95,15 @@ void PipelineContext::draw(Camera *camera) {
         }
     }
 
-    m_finalMaterial->setTexture(gTexture, resultTexture());
+    Texture *t = resultTexture();
+    m_finalMaterial->setTexture(gTexture, t);
 
     // Finish
     m_buffer->setRenderTarget(m_defaultTarget);
     m_buffer->drawMesh(defaultPlane(), 0, CommandBuffer::UI, *m_finalMaterial);
 
     for(auto it : m_postObservers) {
-        (*it.first)(it.second);
+        //(*it.first)(it.second);
     }
 }
 /*!

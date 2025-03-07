@@ -20,14 +20,14 @@ public:
 
     void setLevel(uint32_t level);
 
-    void setClearColor(const Vector4 &color);
-
-    void setClearDepth(float depth);
+    bool isNative() const;
 
 private:
     MTL::RenderPassDescriptor *m_descriptor;
 
     uint32_t m_currentLevel;
+
+    bool m_native;
 
 };
 

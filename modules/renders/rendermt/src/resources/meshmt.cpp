@@ -4,30 +4,27 @@
 
 MeshMt::MeshMt() :
         m_vertexBuffer(nullptr),
-        m_indexBuffer(nullptr) {
+        m_indexBuffer(nullptr),
+        m_vertexSize(0),
+        m_uvSize(0),
+        m_normalsSize(0),
+        m_tangentsSize(0),
+        m_bonesSize(0),
+        m_weightsSize(0) {
 
-}
-
-MTL::Buffer *MeshMt::vertexBuffer() {
-    bind();
-
-    return m_vertexBuffer;
 }
 
 MTL::Buffer *MeshMt::indexBuffer() {
-    bind();
-
     return m_indexBuffer;
 }
 
-void MeshMt::bind() {
+void MeshMt::bind(MTL::RenderCommandEncoder *encoder, int uniformOffset) {
     switch(state()) {
         case ToBeUpdated: {
             update();
 
             switchState(Ready);
         } break;
-        case Ready: break;
         case Unloading: {
             if(m_vertexBuffer != nullptr) {
                 m_vertexBuffer->release();
@@ -42,7 +39,41 @@ void MeshMt::bind() {
             switchState(ToBeDeleted);
             return;
         }
-        default: return;
+        default: break;
+    }
+
+    int index = uniformOffset;
+    size_t offset = 0;
+    encoder->setVertexBuffer(m_vertexBuffer, offset, index++);
+    offset += m_vertexSize;
+
+    if(m_uvSize > 0) {
+        encoder->setVertexBuffer(m_vertexBuffer, offset, index++);
+        offset += m_uvSize;
+    }
+
+    if(m_colorSize > 0) {
+        encoder->setVertexBuffer(m_vertexBuffer, offset, index++);
+        offset += m_colorSize;
+    }
+
+    if(m_normalsSize > 0) {
+        encoder->setVertexBuffer(m_vertexBuffer, offset, index++);
+        offset += m_normalsSize;
+    }
+
+    if(m_tangentsSize > 0) {
+        encoder->setVertexBuffer(m_vertexBuffer, offset, index++);
+        offset += m_tangentsSize;
+    }
+
+    if(m_bonesSize > 0) {
+        encoder->setVertexBuffer(m_vertexBuffer, offset, index++);
+        offset += m_bonesSize;
+    }
+
+    if(m_weightsSize > 0) {
+        encoder->setVertexBuffer(m_vertexBuffer, offset, index);
     }
 }
 
@@ -71,45 +102,51 @@ void MeshMt::update() {
         if(!weights().empty()) size += sizeof(Vector4) * vCount;
         if(!bones().empty()) size += sizeof(Vector4) * vCount;
 
-        m_vertexBuffer = WrapperMt::device()->newBuffer(size, MTL::ResourceStorageModeManaged);
+        if(size > (m_vertexSize + m_uvSize + m_colorSize +
+                    m_normalsSize + m_tangentsSize + m_weightsSize + m_bonesSize)) {
+
+            if(m_vertexBuffer) {
+                m_vertexBuffer->release();
+            }
+
+            m_vertexBuffer = WrapperMt::device()->newBuffer(size, MTL::ResourceStorageModeManaged);
+        }
 
         uint8_t *ptr = reinterpret_cast<uint8_t *>(m_vertexBuffer->contents());
 
-        size_t length = sizeof(Vector3) * vCount;
         size_t offset = 0;
-
-        memcpy(ptr, vertices().data(), length);
-
-        offset += length;
+        m_vertexSize = sizeof(Vector3) * vCount;
+        memcpy(ptr, vertices().data(), m_vertexSize);
+        offset += m_vertexSize;
 
         if(!uv0().empty()) {
-            length = sizeof(Vector2) * vCount;
-            memcpy(&ptr[offset], uv0().data(), length);
-            offset += length;
+            m_uvSize = sizeof(Vector2) * vCount;
+            memcpy(&ptr[offset], uv0().data(), m_uvSize);
+            offset += m_uvSize;
         }
         if(!colors().empty()) {
-            length = sizeof(Vector4) * vCount;
-            memcpy(&ptr[offset], colors().data(), length);
-            offset += length;
+            m_colorSize = sizeof(Vector4) * vCount;
+            memcpy(&ptr[offset], colors().data(), m_colorSize);
+            offset += m_colorSize;
         }
         if(!normals().empty()) {
-            length = sizeof(Vector3) * vCount;
-            memcpy(&ptr[offset], normals().data(), length);
-            offset += length;
+            m_normalsSize = sizeof(Vector3) * vCount;
+            memcpy(&ptr[offset], normals().data(), m_normalsSize);
+            offset += m_normalsSize;
         }
         if(!tangents().empty()) {
-            length = sizeof(Vector3) * vCount;
-            memcpy(&ptr[offset], tangents().data(), length);
-            offset += length;
+            m_tangentsSize = sizeof(Vector3) * vCount;
+            memcpy(&ptr[offset], tangents().data(), m_tangentsSize);
+            offset += m_tangentsSize;
         }
         if(!bones().empty()) {
-            length = sizeof(Vector4) * vCount;
-            memcpy(&ptr[offset], bones().data(), length);
-            offset += length;
+            m_bonesSize = sizeof(Vector4) * vCount;
+            memcpy(&ptr[offset], bones().data(), m_bonesSize);
+            offset += m_bonesSize;
         }
         if(!weights().empty()) {
-            length = sizeof(Vector4) * vCount;
-            memcpy(&ptr[offset], weights().data(), length);
+            m_weightsSize = sizeof(Vector4) * vCount;
+            memcpy(&ptr[offset], weights().data(), m_weightsSize);
         }
 
         m_vertexBuffer->didModifyRange(NS::Range::Make(0, size));

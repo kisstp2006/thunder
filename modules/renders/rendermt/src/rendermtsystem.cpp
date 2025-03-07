@@ -114,13 +114,10 @@ QWindow *RenderMtSystem::createRhiWindow(Viewport *viewport) {
     MTL::Device *device = WrapperMt::device();
     MTK::View *view = MTK::View::alloc()->init(frame, device);
 
+    view->setFramebufferOnly(false);
     view->setDelegate(new ViewDelegate(this, viewport));
 
     return QWindow::fromWinId((WId)view);
-}
-
-ByteArray RenderMtSystem::renderOffscreen(World *world, int width, int height) {
-    return RenderSystem::renderOffscreen(world, width, height);
 }
 
 #endif

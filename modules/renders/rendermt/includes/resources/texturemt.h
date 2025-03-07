@@ -17,6 +17,10 @@ public:
 
     MTL::Texture *nativeHandle();
 
+    MTL::SamplerState *sampler();
+
+    MTL::PixelFormat pixelFormat();
+
 private:
     void readPixels(int x, int y, int width, int height) override;
 
@@ -24,10 +28,10 @@ private:
 
     void uploadTexture(uint32_t slice);
 
-    MTL::PixelFormat pixelFormat();
-
 private:
     MTL::Texture *m_native;
+
+    MTL::SamplerState *m_sampler;
 
 };
 

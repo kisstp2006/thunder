@@ -22,8 +22,6 @@ public:
 
 #ifdef SHARED_DEFINE
     QWindow *createRhiWindow(Viewport *viewport) override;
-
-    ByteArray renderOffscreen(World *world, int width, int height) override;
 #endif
 
 private:
